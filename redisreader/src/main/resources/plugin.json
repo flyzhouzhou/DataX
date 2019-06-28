@@ -1,0 +1,6 @@
+{
+    "name": "redisreader",
+    "class": "com.alibaba.datax.plugin.reader.redisreader.RedisReader",
+    "description": " warn: The more you know about the database, the less problems you encounter.",
+    "developer": "alibaba"
+}
