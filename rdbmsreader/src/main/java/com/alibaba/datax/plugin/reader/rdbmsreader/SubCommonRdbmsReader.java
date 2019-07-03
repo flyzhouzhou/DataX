@@ -24,17 +24,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SubCommonRdbmsReader extends CommonRdbmsReader {
-    static {
+    /*static {
         DBUtil.loadDriverClass("reader", "rdbms");
-    }
+    }*/
 
     public static class Job extends CommonRdbmsReader.Job {
+        static {
+            DBUtil.loadDriverClass("reader", "rdbms");
+        }
+
         public Job(DataBaseType dataBaseType) {
             super(dataBaseType);
         }
     }
 
     public static class Task extends CommonRdbmsReader.Task {
+        static {
+            DBUtil.loadDriverClass("reader", "rdbms");
+        }
 
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private static final boolean IS_DEBUG = LOG.isDebugEnabled();
