@@ -22,13 +22,23 @@ public class DefaultRecord implements Record {
 
 	private List<Column> columns;
 
+	private List<String> columnNames;
+
+	private List<String> columnTypes;
+
 	private int byteSize;
+
+	private String dbInstance;
+
+	private String currentTable;
 
 	// 首先是Record本身需要的内存
 	private int memorySize = ClassSize.DefaultRecordHead;
 
 	public DefaultRecord() {
 		this.columns = new ArrayList<Column>(RECORD_AVERGAE_COLUMN_NUMBER);
+		this.columnNames = new ArrayList<String>(RECORD_AVERGAE_COLUMN_NUMBER);
+		this.columnTypes = new ArrayList<String>(RECORD_AVERGAE_COLUMN_NUMBER);
 	}
 
 	@Override
@@ -116,4 +126,43 @@ public class DefaultRecord implements Record {
 		}
 	}
 
+	@Override
+	public void setDbInstance(String dbInstance){
+		this.dbInstance = dbInstance;
+	}
+
+	@Override
+	public String getDbInstance(){
+		return this.dbInstance;
+	}
+
+	@Override
+	public void setCurrentTable(String currentTable){
+		this.currentTable = currentTable;
+	}
+
+	@Override
+	public String getCurrentTable(){
+		return this.currentTable;
+	}
+
+	@Override
+	public String getColumnNames(int index) {
+		return columnNames.get(index);
+	}
+
+	@Override
+	public void setColumnNames(String columnName) {
+		this.columnNames.add(columnName);
+	}
+
+	@Override
+	public String getColumnTypes(int index) {
+		return columnTypes.get(index);
+	}
+
+	@Override
+	public void setColumnTypes(String columnType) {
+		this.columnTypes.add(columnType);
+	}
 }

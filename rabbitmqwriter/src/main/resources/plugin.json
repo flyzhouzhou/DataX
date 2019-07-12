@@ -1,0 +1,10 @@
+{
+    "name": "rabbitmqwriter",
+    "class": "com.alibaba.datax.plugin.writer.rabbitmqwriter.RabbitmqWriter",
+    "description": {
+        "useScene": "only for developer test.",
+        "mechanism": "use datax framework to transport data to stream.",
+        "warn": "Never use it in your real job."
+    },
+    "developer": "alibaba"
+}

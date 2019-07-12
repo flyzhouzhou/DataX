@@ -172,6 +172,7 @@ public enum DataBaseType {
 
     private static Pattern mysqlPattern = Pattern.compile("jdbc:mysql://(.+):\\d+/.+");
     private static Pattern oraclePattern = Pattern.compile("jdbc:oracle:thin:@(.+):\\d+:.+");
+    private static Pattern sqlitedbPattern = Pattern.compile("jdbc:sqlite:(.+)");
 
     /**
      * 注意：目前只实现了从 mysql/oracle 中识别出ip 信息.未识别到则返回 null.
@@ -187,6 +188,17 @@ public enum DataBaseType {
         }
         return null;
     }
+
+    public static String parseDbInstanceFromJdbcUrl(String jdbcUrl) {
+        String threadName = Thread.currentThread().getName();
+        System.out.println(threadName);
+        Matcher dbinstance = sqlitedbPattern.matcher(jdbcUrl);
+        if (dbinstance.matches()) {
+            return dbinstance.group(1);
+        }
+        return null;
+    }
+
     public String getTypeName() {
         return typeName;
     }

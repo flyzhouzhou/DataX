@@ -1,12 +1,6 @@
 package com.alibaba.datax.plugin.rdbms.reader;
 
-import com.alibaba.datax.common.element.BoolColumn;
-import com.alibaba.datax.common.element.BytesColumn;
-import com.alibaba.datax.common.element.DateColumn;
-import com.alibaba.datax.common.element.DoubleColumn;
-import com.alibaba.datax.common.element.LongColumn;
-import com.alibaba.datax.common.element.Record;
-import com.alibaba.datax.common.element.StringColumn;
+import com.alibaba.datax.common.element.*;
 import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordSender;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
@@ -128,6 +122,9 @@ public class CommonRdbmsReader {
         private String jdbcUrl;
         private String mandatoryEncoding;
 
+        public String dbInstance;
+        public String currentTable;
+
         // 作为日志显示信息时，需要附带的通用信息。比如信息所对应的数据库连接等信息，针对哪个表做的操作
         private String basicMsg;
 
@@ -174,6 +171,10 @@ public class CommonRdbmsReader {
                               TaskPluginCollector taskPluginCollector, int fetchSize) {
             String querySql = readerSliceConfig.getString(Key.QUERY_SQL);
             String table = readerSliceConfig.getString(Key.TABLE);
+            this.dbInstance = readerSliceConfig.getString(Key.DBINSTANCE);
+            this.currentTable = readerSliceConfig.getString(Key.TABLE);
+            //System.out.println(this.hashCode());
+            //System.out.println(currentTable);
 
             PerfTrace.getInstance().addTaskDetails(taskId, table + "," + basicMsg);
 
@@ -241,9 +242,12 @@ public class CommonRdbmsReader {
         protected Record buildRecord(RecordSender recordSender,ResultSet rs, ResultSetMetaData metaData, int columnNumber, String mandatoryEncoding,
         		TaskPluginCollector taskPluginCollector) {
         	Record record = recordSender.createRecord();
+        	record.setDbInstance(this.dbInstance);
+        	record.setCurrentTable(this.currentTable);
 
             try {
                 for (int i = 1; i <= columnNumber; i++) {
+                    record.setColumnNames(metaData.getColumnName(i));
                     switch (metaData.getColumnType(i)) {
 
                     case Types.CHAR:
@@ -252,6 +256,7 @@ public class CommonRdbmsReader {
                     case Types.LONGVARCHAR:
                     case Types.NVARCHAR:
                     case Types.LONGNVARCHAR:
+                        record.setColumnTypes(ColumnType.Ty_STRING);
                         String rawData;
                         if(StringUtils.isBlank(mandatoryEncoding)){
                             rawData = rs.getString(i);
@@ -264,6 +269,7 @@ public class CommonRdbmsReader {
 
                     case Types.CLOB:
                     case Types.NCLOB:
+                        record.setColumnTypes(ColumnType.Ty_BLOB);
                         record.addColumn(new StringColumn(rs.getString(i)));
                         break;
 
@@ -271,26 +277,31 @@ public class CommonRdbmsReader {
                     case Types.TINYINT:
                     case Types.INTEGER:
                     case Types.BIGINT:
+                        record.setColumnTypes(ColumnType.Ty_INTERGER);
                         record.addColumn(new LongColumn(rs.getString(i)));
                         break;
 
                     case Types.NUMERIC:
                     case Types.DECIMAL:
+                        record.setColumnTypes(ColumnType.Ty_NUMERIC);
                         record.addColumn(new DoubleColumn(rs.getString(i)));
                         break;
 
                     case Types.FLOAT:
                     case Types.REAL:
                     case Types.DOUBLE:
+                        record.setColumnTypes(ColumnType.Ty_FLOAT);
                         record.addColumn(new DoubleColumn(rs.getString(i)));
                         break;
 
                     case Types.TIME:
+                        record.setColumnTypes(ColumnType.Ty_TIME);
                         record.addColumn(new DateColumn(rs.getTime(i)));
                         break;
 
                     // for mysql bug, see http://bugs.mysql.com/bug.php?id=35115
                     case Types.DATE:
+                        record.setColumnTypes(ColumnType.Ty_DATE);
                         if (metaData.getColumnTypeName(i).equalsIgnoreCase("year")) {
                             record.addColumn(new LongColumn(rs.getInt(i)));
                         } else {
@@ -299,6 +310,7 @@ public class CommonRdbmsReader {
                         break;
 
                     case Types.TIMESTAMP:
+                        record.setColumnTypes(ColumnType.Ty_TIMESTAMP);
                         record.addColumn(new DateColumn(rs.getTimestamp(i)));
                         break;
 
@@ -306,6 +318,7 @@ public class CommonRdbmsReader {
                     case Types.VARBINARY:
                     case Types.BLOB:
                     case Types.LONGVARBINARY:
+                        record.setColumnTypes(ColumnType.Ty_BLOB);
                         record.addColumn(new BytesColumn(rs.getBytes(i)));
                         break;
 
@@ -313,6 +326,7 @@ public class CommonRdbmsReader {
                     // warn: bit(>1) -> Types.VARBINARY 可使用BytesColumn
                     case Types.BOOLEAN:
                     case Types.BIT:
+                        record.setColumnTypes(ColumnType.Ty_BOOLEAN);
                         record.addColumn(new BoolColumn(rs.getBoolean(i)));
                         break;
 

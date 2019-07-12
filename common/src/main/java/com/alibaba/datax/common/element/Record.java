@@ -20,4 +20,20 @@ public interface Record {
 
 	public int getMemorySize();
 
+	public void setDbInstance(String dbInstance);
+
+	public String getDbInstance();
+
+	public void setCurrentTable(String currentTable);
+
+	public String getCurrentTable();
+
+	public String getColumnNames(int index);
+
+	public void setColumnNames(String columnName);
+
+	public String getColumnTypes(int index);
+
+	public void setColumnTypes(String columnType);
+
 }

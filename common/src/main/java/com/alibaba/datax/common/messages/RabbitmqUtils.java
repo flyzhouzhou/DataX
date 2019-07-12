@@ -1,14 +1,13 @@
 package com.alibaba.datax.common.messages;
 
 import com.rabbitmq.client.*;
-
 import java.io.IOException;
 
 
 public class RabbitmqUtils {
     private static final String RABBIT_HOST = "localhost";
-    private static final String RABBIT_USERNAME = "rabbitmq";
-    private static final String RABBIT_PASSWORD = "rabbitmq";
+    private static final String RABBIT_USERNAME = "guest";
+    private static final String RABBIT_PASSWORD = "guest";
 
     private static final String EXCHANGE_NAME = "collection.message.exchange";
     private static final String QUEUE_NAME = "collection.message.queue";
@@ -29,14 +28,14 @@ public class RabbitmqUtils {
         return connection;
     }
 
-    public static void produceMessage(){
+    public static void produceMessage(String msg){
         Connection connection = getConnection();
         try{
             Channel channel = connection.createChannel(1);
             channel.queueDeclare(QUEUE_NAME, true, false, false, null);
             channel.exchangeDeclare(EXCHANGE_NAME,"direct",true,false,null);
             channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
-            String message = "Hello";
+            String message = msg;
             channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, message.getBytes());
             System.out.println("producing...");
             channel.close();
@@ -76,9 +75,9 @@ public class RabbitmqUtils {
 
     public static void main(String[] args){
         try{
-            produceMessage();
+            //produceMessage();
             Thread.sleep(2000);
-            //consumeMessage();
+            consumeMessage();
         }catch(Exception e){
             e.printStackTrace();
         }

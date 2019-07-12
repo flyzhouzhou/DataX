@@ -41,6 +41,7 @@ public final class ReaderSplitUtil {
             Configuration connConf = Configuration.from(conns.get(i).toString());
             String jdbcUrl = connConf.getString(Key.JDBC_URL);
             sliceConfig.set(Key.JDBC_URL, jdbcUrl);
+            sliceConfig.set(Key.DBINSTANCE, DataBaseType.parseDbInstanceFromJdbcUrl(jdbcUrl));
 
             // 抽取 jdbcUrl 中的 ip/port 进行资源使用的打标，以提供给 core 做有意义的 shuffle 操作
             sliceConfig.set(CommonConstant.LOAD_BALANCE_RESOURCE_MARK, DataBaseType.parseIpFromJdbcUrl(jdbcUrl));

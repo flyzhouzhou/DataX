@@ -73,6 +73,39 @@ public class DirtyRecord implements Record {
 		this.columns = columns;
 	}
 
+	@Override
+	public void setDbInstance(String dbInstance){}
+
+	@Override
+	public String getDbInstance(){
+		return null;
+	}
+
+	@Override
+	public void setCurrentTable(String currentTable){}
+
+	@Override
+	public String getCurrentTable(){
+		return null;
+	}
+
+	@Override
+	public String getColumnNames(int index) {
+		return null;
+	}
+
+	@Override
+	public void setColumnNames(String columnName) {
+	}
+
+	@Override
+	public String getColumnTypes(int index) {
+		return null;
+	}
+
+	@Override
+	public void setColumnTypes(String columnType) {
+	}
 }
 
 class DirtyColumn extends Column {

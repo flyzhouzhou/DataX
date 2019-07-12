@@ -1,0 +1,6 @@
+{
+    "name": "rabbitmqwriter",
+    "parameter": {
+        "message": true
+    }
+}

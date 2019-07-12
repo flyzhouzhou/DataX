@@ -94,6 +94,7 @@
         <module>hbase20xsqlreader</module>
         <module>hbase20xsqlwriter</module>
         <module>redisreader</module>
+        <module>rabbitmqwriter</module>
     </modules>
 
     <dependencyManagement>

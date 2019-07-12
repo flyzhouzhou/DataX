@@ -45,4 +45,38 @@ public class TerminateRecord implements Record {
 	public void setColumn(int i, Column column) {
 		return;
 	}
+
+	@Override
+	public void setDbInstance(String dbInstance){}
+
+	@Override
+	public String getDbInstance(){
+		return null;
+	}
+
+	@Override
+	public void setCurrentTable(String currentTable){}
+
+	@Override
+	public String getCurrentTable(){
+		return null;
+	}
+
+	@Override
+	public String getColumnNames(int index) {
+		return null;
+	}
+
+	@Override
+	public void setColumnNames(String columnName) {
+	}
+
+	@Override
+	public String getColumnTypes(int index) {
+		return null;
+	}
+
+	@Override
+	public void setColumnTypes(String columnType) {
+	}
 }
