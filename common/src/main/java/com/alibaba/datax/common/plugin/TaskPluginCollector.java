@@ -54,4 +54,6 @@ public abstract class TaskPluginCollector implements PluginCollector {
 	 * 如果多个key冲突，内部使用List记录同一个key，多个value情况。<br >
 	 * */
 	public abstract void collectMessage(final String key, final String value);
+
+	public abstract void collectTableState(final String tableName, final long timestamp);
 }
