@@ -8,6 +8,10 @@ import java.util.Set;
 
 public class JobStateStructure {
 
+    private String type;
+
+    private String dbType;
+
     private String dbName;
 
     private String percentage;
@@ -23,12 +27,30 @@ public class JobStateStructure {
         this.nowTables = new HashSet<String>();
     }
 
-    public JobStateStructure(String dbName, String percentage, String state) {
+    public JobStateStructure(String type, String dbType, String dbName, String percentage, String state) {
+        this.type = type;
+        this.dbType = dbType;
         this.dbName = dbName;
         this.percentage = percentage;
         this.state = state;
         this.finishedTables = new HashSet<String>();
         this.nowTables = new HashSet<String>();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDbType() {
+        return dbType;
+    }
+
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
     }
 
     public String getDbName() {
