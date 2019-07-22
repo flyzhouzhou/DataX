@@ -9,6 +9,7 @@ import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.core.util.FrameworkErrorCode;
 
+import com.alibaba.datax.dataxservice.face.domain.enums.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,18 @@ public abstract class AbstractTaskPluginCollector extends TaskPluginCollector {
     @Override
     final public void collectMessage(String key, String value) {
         this.communication.addMessage(key, value);
+    }
+
+    @Override
+    final public void collectTableState(String key, long value){ this.communication.addTableState(key, value);}
+
+    @Override
+    final public void collectTaskState(String state){
+        if(state.equals("waiting")){
+            this.communication.setState(State.WAITING);
+        }else if(state.equals("running")){
+            this.communication.setState(State.RUNNING);
+        }
     }
 
     @Override

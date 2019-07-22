@@ -28,4 +28,10 @@ public final class DefaultJobPluginCollector implements JobPluginCollector {
         Communication totalCommunication = this.jobCollector.collect();
         return totalCommunication.getMessage(key);
     }
+
+    @Override
+    public Map<String, Long> getTableState(){
+        Communication totalCommunication = this.jobCollector.collect();
+        return totalCommunication.getTableState();
+    }
 }

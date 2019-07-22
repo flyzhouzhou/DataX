@@ -75,6 +75,16 @@ public class RedisUtils {
         return result;
     }
 
+    public static boolean set(Jedis jedisClient, String key, String value){
+        try{
+            jedisClient.set(key, value);
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     //list
     public static Object lget(Jedis jedisClient, String key){
         Object result = null;

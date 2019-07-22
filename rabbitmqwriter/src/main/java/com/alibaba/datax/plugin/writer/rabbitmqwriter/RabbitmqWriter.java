@@ -81,6 +81,9 @@ public class RabbitmqWriter extends Writer {
             try {
                 Record record;
                 while ((record = recordReceiver.getFromReader()) != null) {
+
+                    getTaskPluginCollector().collectTableState(record.getCurrentTable(), System.currentTimeMillis());
+
                     if (this.message) {
                         String msg = recordToString(record);
                         RabbitmqUtils.produceMessage(msg);

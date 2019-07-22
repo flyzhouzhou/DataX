@@ -111,6 +111,8 @@ public class CommonRdbmsReader {
         private static final Logger LOG = LoggerFactory
                 .getLogger(Task.class);
         private static final boolean IS_DEBUG = LOG.isDebugEnabled();
+        private static final String TASK_RUNNING = "running";
+        private static final String TASK_WAITING = "waiting";
         protected final byte[] EMPTY_CHAR_ARRAY = new byte[0];
 
         private DataBaseType dataBaseType;
@@ -173,8 +175,6 @@ public class CommonRdbmsReader {
             String table = readerSliceConfig.getString(Key.TABLE);
             this.dbInstance = readerSliceConfig.getString(Key.DBINSTANCE);
             this.currentTable = readerSliceConfig.getString(Key.TABLE);
-            //System.out.println(this.hashCode());
-            //System.out.println(currentTable);
 
             PerfTrace.getInstance().addTaskDetails(taskId, table + "," + basicMsg);
 
@@ -183,8 +183,10 @@ public class CommonRdbmsReader {
             PerfRecord queryPerfRecord = new PerfRecord(taskGroupId,taskId, PerfRecord.PHASE.SQL_QUERY);
             queryPerfRecord.start();
 
+            taskPluginCollector.collectTaskState(TASK_WAITING);
             Connection conn = DBUtil.getConnection(this.dataBaseType, jdbcUrl,
                     username, password);
+            taskPluginCollector.collectTaskState(TASK_RUNNING);
 
             // session config .etc related
             DBUtil.dealWithSessionConfig(conn, readerSliceConfig,

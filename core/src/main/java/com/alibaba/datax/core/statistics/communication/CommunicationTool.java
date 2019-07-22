@@ -7,6 +7,7 @@ import org.apache.commons.lang.Validate;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -108,6 +109,15 @@ public final class CommunicationTool {
     public static long getWriteSucceedBytes(final Communication communication) {
         return communication.getLongCounter(WRITE_RECEIVED_BYTES) -
                 communication.getLongCounter(WRITE_FAILED_BYTES);
+    }
+
+    public static Map<String, Long> getCurrentTable(final Communication communication) {
+        return communication.getTableState();
+    }
+
+    public static String getPercentage(final Communication communication){
+        DecimalFormat df = new DecimalFormat("0.00");
+        return df.format(communication.getDoubleCounter(PERCENTAGE) * 100) + "%";
     }
 
     public static class Stringify {

@@ -56,4 +56,6 @@ public abstract class TaskPluginCollector implements PluginCollector {
 	public abstract void collectMessage(final String key, final String value);
 
 	public abstract void collectTableState(final String tableName, final long timestamp);
+
+	public abstract void collectTaskState(final String state);
 }

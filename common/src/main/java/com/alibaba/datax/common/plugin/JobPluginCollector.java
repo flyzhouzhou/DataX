@@ -19,4 +19,9 @@ public interface JobPluginCollector extends PluginCollector {
 	 * 
 	 * */
 	List<String> getMessage(String key);
+
+	/**
+	 * 从Task获取table信息
+	 */
+	Map<String, Long> getTableState();
 }

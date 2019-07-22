@@ -12,14 +12,24 @@ public class RedisStorage {
 
     private int port = 6379;
 
-    private String password = "123";
+    //private String password = "123";
 
     public RedisStorage(){
-        RedisUtils redisUtils = new RedisUtils(host, port, password);
+        RedisUtils redisUtils = new RedisUtils(host, port);
         jedisClient = redisUtils.getJedisClient();
     }
 
-    public void writeJobStatus(long jobId, boolean status){
-        RedisUtils.hset(this.jedisClient, String.valueOf(jobId), Constants.STATUS, String.valueOf(status));
+    public void writeJobStatus(long jobId, JobStateStructure state){
+        RedisUtils.set(this.jedisClient, String.valueOf(jobId), state.toString());
+    }
+
+    public JobStateStructure readJobStatus(long jobId){
+        Object object = RedisUtils.get(this.jedisClient, String.valueOf(jobId));
+        return JobStateStructure.parseJsonString((String)object);
+    }
+
+    public static void main(String[] args){
+        RedisStorage redisStorage = new RedisStorage();
+        //redisStorage.writeJobStatus(100,false);
     }
 }

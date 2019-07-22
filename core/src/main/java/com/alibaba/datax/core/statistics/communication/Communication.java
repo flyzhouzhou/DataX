@@ -40,6 +40,15 @@ public class Communication extends BaseObject implements Cloneable {
      */
     Map<String, List<String>> message;
 
+    /**
+     *  收集task 的table信息
+     */
+    Map<String, Long> tableState;
+
+    /**
+     * 收集task 的连接状态
+     */
+
     public Communication() {
         this.init();
     }
@@ -54,6 +63,7 @@ public class Communication extends BaseObject implements Cloneable {
         this.throwable = null;
         this.message = new ConcurrentHashMap<String, List<String>>();
         this.timestamp = System.currentTimeMillis();
+        this.tableState = new ConcurrentHashMap<String, Long>();
     }
 
     public Map<String, Number> getCounter() {
@@ -123,6 +133,15 @@ public class Communication extends BaseObject implements Cloneable {
         valueList.add(value);
     }
 
+    public Map<String, Long> getTableState(){
+        return this.tableState;
+    }
+
+    public synchronized void addTableState(final String key, final long value){
+        Validate.isTrue(StringUtils.isNotBlank(key), "设置tableState的key不能为空");
+        this.tableState.put(key, value);
+    }
+
     public synchronized Long getLongCounter(final String key) {
         Number value = this.counter.get(key);
 
@@ -189,6 +208,15 @@ public class Communication extends BaseObject implements Cloneable {
             }
         }
 
+        /**
+         * clone tableState
+         */
+        for(Entry<String, Long> entry : this.tableState.entrySet()){
+            String key = entry.getKey();
+            Long value = this.tableState.get(key);
+            communication.addTableState(key, value);
+        }
+
         return communication;
     }
 
@@ -249,6 +277,26 @@ public class Communication extends BaseObject implements Cloneable {
             valueList.addAll(entry.getValue());
         }
 
+        /**
+         * tableState的合并方式，更新时间
+         */
+        for(Entry<String, Long> entry : otherComm.getTableState().entrySet()){
+            String key = entry.getKey();
+            Long otherValue = entry.getValue();
+            if (otherValue == null) {
+                continue;
+            }
+            Long value = this.tableState.get(key);
+            if (value == null) {
+                value = otherValue;
+            } else {
+                if (value.longValue() <= otherValue.longValue()) {
+                    value = otherValue.longValue();
+                }
+            }
+            this.tableState.put(key, value);
+        }
+
         return this;
     }
 
@@ -265,7 +313,9 @@ public class Communication extends BaseObject implements Cloneable {
         if (this.state == State.FAILED || otherComm.getState() == State.FAILED
                 || this.state == State.KILLED || otherComm.getState() == State.KILLED) {
             retState = State.FAILED;
-        } else if (this.state.isRunning() || otherComm.state.isRunning()) {
+        }else if (this.state == State.WAITING || otherComm.getState() == State.WAITING) {
+            retState = State.WAITING;
+        }else if (this.state.isRunning() || otherComm.state.isRunning()) {
             retState = State.RUNNING;
         }
 
