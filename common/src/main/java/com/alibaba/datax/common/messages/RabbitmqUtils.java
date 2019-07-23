@@ -1,57 +1,84 @@
 package com.alibaba.datax.common.messages;
 
 import com.rabbitmq.client.*;
+
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 
 public class RabbitmqUtils {
-    private static final String RABBIT_HOST = "localhost";
-    private static final String RABBIT_USERNAME = "guest";
-    private static final String RABBIT_PASSWORD = "guest";
+    private String rabbitHost;
+    private String rabbitUsername;
+    private String rabbitPassword;
 
-    private static final String EXCHANGE_NAME = "collection.message.exchange";
-    private static final String QUEUE_NAME = "collection.message.queue";
-    private static final String ROUTING_KEY = "collection.message.queue.key";
+    private String exchangeName;
+    private String queueName;
+    private String routingKey;
 
-    public static Connection getConnection(){
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(RABBIT_HOST);
-        connectionFactory.setPort(AMQP.PROTOCOL.PORT);
-        connectionFactory.setUsername(RABBIT_USERNAME);
-        connectionFactory.setPassword(RABBIT_PASSWORD);
-        Connection connection = null;
+    private Connection connection;
+
+    public RabbitmqUtils(){
+        String envPath = System.getProperty("datax.home");
+        String properPath = envPath + "\\conf\\rabbitserver.properties";
         try{
-            connection = connectionFactory.newConnection();
+            Properties properties = new Properties();
+            FileInputStream fis = new FileInputStream(properPath);
+            properties.load(fis);
+            fis.close();
+            rabbitHost = properties.getProperty("rabbit.host");
+            rabbitUsername = properties.getProperty("rabbit.name");
+            rabbitPassword = properties.getProperty("rabbit.password");
+            exchangeName = properties.getProperty("rabbit.exchangename");
+            queueName = properties.getProperty("rabbit.queuename");
+            routingKey = properties.getProperty("rabbit.routingkey");
+            getConnection();
         }catch(Exception e){
             e.printStackTrace();
         }
-        return connection;
     }
 
-    public static void produceMessage(String msg){
-        Connection connection = getConnection();
+    public void finalize(){
         try{
-            Channel channel = connection.createChannel(1);
-            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-            channel.exchangeDeclare(EXCHANGE_NAME,"direct",true,false,null);
-            channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
-            String message = msg;
-            channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, message.getBytes());
-            System.out.println("producing...");
-            channel.close();
             connection.close();
         }catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    public static void consumeMessage(){
-        Connection connection = getConnection();
+    private void getConnection(){
+        ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost(rabbitHost);
+        connectionFactory.setPort(AMQP.PROTOCOL.PORT);
+        connectionFactory.setUsername(rabbitUsername);
+        connectionFactory.setPassword(rabbitPassword);
+        try{
+            this.connection = connectionFactory.newConnection();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void produceMessage(String msg){
         try{
             Channel channel = connection.createChannel(1);
-            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-            channel.exchangeDeclare(EXCHANGE_NAME,"direct",true,false,null);
-            channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
+            channel.queueBind(queueName, exchangeName, routingKey);
+            String message = msg;
+            channel.basicPublish(exchangeName, routingKey, null, message.getBytes());
+            channel.close();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void consumeMessage(){
+        try{
+            Channel channel = connection.createChannel(1);
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
+            channel.queueBind(queueName, exchangeName, routingKey);
             Consumer consumer = new DefaultConsumer(channel){
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)throws IOException{
@@ -66,8 +93,7 @@ public class RabbitmqUtils {
                     System.out.println(message.toString());
                 }
             };
-            channel.basicConsume(QUEUE_NAME, true, consumer);
-
+            channel.basicConsume(queueName, true, consumer);
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -75,9 +101,9 @@ public class RabbitmqUtils {
 
     public static void main(String[] args){
         try{
-            //produceMessage();
+            RabbitmqUtils rabbitmqUtils = new RabbitmqUtils();
             Thread.sleep(2000);
-            consumeMessage();
+            rabbitmqUtils.consumeMessage();
         }catch(Exception e){
             e.printStackTrace();
         }

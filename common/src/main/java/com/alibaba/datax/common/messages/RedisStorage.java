@@ -3,20 +3,42 @@ package com.alibaba.datax.common.messages;
 
 import redis.clients.jedis.Jedis;
 
+import java.io.FileInputStream;
+import java.util.Properties;
+
 
 public class RedisStorage {
 
     private Jedis jedisClient;
 
-    private String host = "127.0.0.1";
+    private String host;
 
-    private int port = 6379;
+    private int port;
 
-    //private String password = "123";
+    private String password;
 
     public RedisStorage(){
-        RedisUtils redisUtils = new RedisUtils(host, port);
-        jedisClient = redisUtils.getJedisClient();
+        String envPath = System.getProperty("datax.home");
+        String properPath = envPath + "\\conf\\redisserver.properties";
+        try{
+            Properties properties = new Properties();
+            FileInputStream fis = new FileInputStream(properPath);
+            properties.load(fis);
+            fis.close();
+            host = properties.getProperty("redis.host");
+            port = Integer.parseInt(properties.getProperty("redis.port"));
+            password = properties.getProperty("redis.password");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        if(password == null || password.equals("")){
+            RedisUtils redisUtils = new RedisUtils(host, port);
+            jedisClient = redisUtils.getJedisClient();
+        }else{
+            RedisUtils redisUtils = new RedisUtils(host, port, password);
+            jedisClient = redisUtils.getJedisClient();
+        }
     }
 
     public void writeJobStatus(long jobId, JobStateStructure state){
