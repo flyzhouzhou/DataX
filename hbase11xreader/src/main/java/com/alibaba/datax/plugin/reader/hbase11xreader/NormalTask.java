@@ -62,6 +62,8 @@ public class NormalTask extends HbaseAbstractTask {
                     String constantValue = cell.getColumnValue();
 
                     Column constantColumn = super.convertValueToAssignType(columnType,constantValue,cell.getDateformat());
+                    record.setColumnNames(cell.getColumnName());
+                    record.setColumnTypes(cell.getColumnType().toString());
                     record.addColumn(constantColumn);
                 } else {
                     // 根据列名称获取值
@@ -75,6 +77,8 @@ public class NormalTask extends HbaseAbstractTask {
                     }
 
                     Column hbaseColumn = super.convertBytesToAssignType(columnType,hbaseColumnValue,cell.getDateformat());
+                    record.setColumnNames(cell.getColumnName());
+                    record.setColumnTypes(cell.getColumnType().toString());
                     record.addColumn(hbaseColumn);
                 }
             }

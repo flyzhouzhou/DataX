@@ -82,11 +82,11 @@ public class RabbitmqUtils {
             Consumer consumer = new DefaultConsumer(channel){
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)throws IOException{
-                    try{
+                    /*try{
                         Thread.sleep(2000);
                     }catch(InterruptedException e){
                         e.printStackTrace();
-                    }
+                    }*/
                     StringBuffer message = new StringBuffer();
                     super.handleDelivery(consumerTag, envelope, properties, body);
                     message.append(new String(body, "UTF-8"));
@@ -102,7 +102,7 @@ public class RabbitmqUtils {
     public static void main(String[] args){
         try{
             RabbitmqUtils rabbitmqUtils = new RabbitmqUtils();
-            Thread.sleep(2000);
+            //Thread.sleep(20);
             rabbitmqUtils.consumeMessage();
         }catch(Exception e){
             e.printStackTrace();

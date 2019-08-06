@@ -41,11 +41,15 @@ public class Hbase11xReader extends Reader {
         private Configuration taskConfig;
         private static Logger LOG = LoggerFactory.getLogger(Task.class);
         private HbaseAbstractTask hbaseTaskProxy;
+
+        private String currentTable;
+
         @Override
         public void init() {
             this.taskConfig = super.getPluginJobConf();
             String mode = this.taskConfig.getString(Key.MODE);
             ModeType modeType = ModeType.getByTypeName(mode);
+            this.currentTable = this.taskConfig.getString(Key.TABLE);
 
             switch (modeType) {
                 case Normal:
@@ -82,6 +86,7 @@ public class Hbase11xReader extends Reader {
                     continue;
                 }
                 if (fetchOK) {
+                    record.setCurrentTable(this.currentTable);
                     recordSender.sendToWriter(record);
                     record = recordSender.createRecord();
                 } else {
