@@ -113,7 +113,8 @@ public abstract class HbaseAbstractTask {
                 column = new StringColumn(ArrayUtils.isEmpty(byteArray) ? null : new String(byteArray, encoding));
                 break;
             case BINARY_STRING:
-                column = new StringColumn(ArrayUtils.isEmpty(byteArray) ? null : Bytes.toStringBinary(byteArray));
+                column = new BytesColumn(ArrayUtils.isEmpty(byteArray) ? null : byteArray);
+                //column = new StringColumn(ArrayUtils.isEmpty(byteArray) ? null : Bytes.toStringBinary(byteArray));
                 break;
             case DATE:
                 String dateValue = Bytes.toStringBinary(byteArray);

@@ -75,6 +75,7 @@ public class RabbitmqWriter extends Writer {
         private String dbType;
         private String dbName;
         private static String columnBlobType = "blob";
+        private static String binaryString = "binarystring";
         private String baseDir;
         private RabbitmqUtils rabbitmqUtils;
 
@@ -157,7 +158,7 @@ public class RabbitmqWriter extends Writer {
                 String columnType = record.getColumnTypes(i);
                 column = record.getColumn(i);
                 String columnValue;
-                if(columnType.equals(columnBlobType)){
+                if(columnType.equals(columnBlobType) || columnType.equals(binaryString)){
                     columnValue = saveBlobDataToFile(column.asBytes());
                 }else{
                     columnValue = column.asString();
