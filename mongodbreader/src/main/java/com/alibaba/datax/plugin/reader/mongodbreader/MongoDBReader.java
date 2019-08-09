@@ -124,10 +124,12 @@ public class MongoDBReader extends Reader {
             while (dbCursor.hasNext()) {
                 Document item = dbCursor.next();
                 Record record = recordSender.createRecord();
+                record.setCurrentTable(col.getNamespace().getCollectionName());
                 Iterator columnItera = mongodbColumnMeta.iterator();
                 while (columnItera.hasNext()) {
                     JSONObject column = (JSONObject)columnItera.next();
                     Object tempCol = item.get(column.getString(KeyConstant.COLUMN_NAME));
+                    record.setColumnNames(column.getString(KeyConstant.COLUMN_NAME));
                     if (tempCol == null) {
                         if (KeyConstant.isDocumentType(column.getString(KeyConstant.COLUMN_TYPE))) {
                             String[] name = column.getString(KeyConstant.COLUMN_NAME).split("\\.");
@@ -153,16 +155,22 @@ public class MongoDBReader extends Reader {
                         record.addColumn(new StringColumn(null));
                     }else if (tempCol instanceof Double) {
                         //TODO deal with Double.isNaN()
+                        record.setColumnTypes(ColumnType.Ty_FLOAT);
                         record.addColumn(new DoubleColumn((Double) tempCol));
                     } else if (tempCol instanceof Boolean) {
+                        record.setColumnTypes(ColumnType.Ty_BOOLEAN);
                         record.addColumn(new BoolColumn((Boolean) tempCol));
                     } else if (tempCol instanceof Date) {
+                        record.setColumnTypes(ColumnType.Ty_DATE);
                         record.addColumn(new DateColumn((Date) tempCol));
                     } else if (tempCol instanceof Integer) {
+                        record.setColumnTypes(ColumnType.Ty_INTERGER);
                         record.addColumn(new LongColumn((Integer) tempCol));
                     }else if (tempCol instanceof Long) {
+                        record.setColumnTypes(ColumnType.Ty_INTERGER);
                         record.addColumn(new LongColumn((Long) tempCol));
                     } else {
+                        record.setColumnTypes(ColumnType.Ty_STRING);
                         if(KeyConstant.isArrayType(column.getString(KeyConstant.COLUMN_TYPE))) {
                             String splitter = column.getString(KeyConstant.COLUMN_SPLITTER);
                             if(Strings.isNullOrEmpty(splitter)) {
