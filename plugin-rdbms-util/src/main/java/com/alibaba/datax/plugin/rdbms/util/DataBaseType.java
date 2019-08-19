@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
  */
 public enum DataBaseType {
     MySql("mysql", "com.mysql.jdbc.Driver"),
+    MySql8("mysql8", "com.mysql.cj.jdbc.Driver"),
     Tddl("mysql", "com.mysql.jdbc.Driver"),
     DRDS("drds", "com.mysql.jdbc.Driver"),
     Oracle("oracle", "oracle.jdbc.OracleDriver"),
@@ -56,6 +57,8 @@ public enum DataBaseType {
             	break;
             case RDBMS:
                 break;
+            case MySql8:
+                break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type.");
         }
@@ -93,6 +96,8 @@ public enum DataBaseType {
             	break;
             case RDBMS:
                 break;
+            case MySql8:
+                break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type.");
         }
@@ -105,6 +110,7 @@ public enum DataBaseType {
 
         switch (this) {
             case MySql:
+            case MySql8:
             case Oracle:
                 if (splitPk.length() >= 2 && splitPk.startsWith("`") && splitPk.endsWith("`")) {
                     result = splitPk.substring(1, splitPk.length() - 1).toLowerCase();
@@ -131,6 +137,7 @@ public enum DataBaseType {
 
         switch (this) {
             case MySql:
+            case MySql8:
                 result = "`" + columnName.replace("`", "``") + "`";
                 break;
             case Oracle:
@@ -153,6 +160,7 @@ public enum DataBaseType {
 
         switch (this) {
             case MySql:
+            case MySql8:
                 result = "`" + tableName.replace("`", "``") + "`";
                 break;
             case Oracle:
