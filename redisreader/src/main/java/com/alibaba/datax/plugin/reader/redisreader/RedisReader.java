@@ -79,7 +79,10 @@ public class RedisReader extends Reader {
             Iterator<String> ite = this.keys.iterator();
             while(ite.hasNext()){
                 Record record = recordSender.createRecord();
+                record.setDbInstance(String.valueOf(this.dbInstance));
+                record.setCurrentTable("no-table");
                 String key = ite.next();
+                record.setColumnNames(key);
                 String type = jedisClient.type(key);
                 Object tempCol = null;
                 if(type.equals("string")){
@@ -96,17 +99,21 @@ public class RedisReader extends Reader {
                     //continue; 这个不能直接continue会导致record到目的端错位
                     record.addColumn(new StringColumn(null));
                 } else if (tempCol instanceof String) {
+                    record.setColumnTypes("string");
                     String colString = StrUtils.makeStringToString((String)tempCol, key);
                     record.addColumn(new StringColumn(colString));
                 } else if (tempCol instanceof List) {
+                    record.setColumnTypes("list");
                     List<String> list = (List<String>) tempCol;
                     String colString = StrUtils.getListToString(list, key);
                     record.addColumn(new StringColumn(colString));
                 } else if (tempCol instanceof Map) {
+                    record.setColumnTypes("map");
                     Map<String, String> map = (Map<String, String>) tempCol;
                     String colString = StrUtils.getMapToString(map, key);
                     record.addColumn(new StringColumn(colString));
                 } else if (tempCol instanceof Set) {
+                    record.setColumnTypes("set");
                     Set<String> set = (Set<String>) tempCol;
                     String colString = StrUtils.getSetToString(set, key);
                     record.addColumn(new StringColumn(colString));
