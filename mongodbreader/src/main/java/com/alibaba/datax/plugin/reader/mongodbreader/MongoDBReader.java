@@ -1,10 +1,8 @@
 package com.alibaba.datax.plugin.reader.mongodbreader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 import com.alibaba.datax.common.element.BoolColumn;
 import com.alibaba.datax.common.element.DateColumn;
@@ -24,10 +22,15 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -92,6 +95,9 @@ public class MongoDBReader extends Reader {
         private Object lowerBound = null;
         private Object upperBound = null;
         private boolean isObjectId = true;
+        private boolean isGridFs = false;
+        private String baseDir;
+        private String tmpFileBakPath;
 
         @Override
         public void startRead(RecordSender recordSender) {
@@ -123,7 +129,15 @@ public class MongoDBReader extends Reader {
             dbCursor = col.find(filter).iterator();
             while (dbCursor.hasNext()) {
                 Document item = dbCursor.next();
+                if(this.isGridFs){
+                    ObjectId id = item.getObjectId("_id");
+                    saveBlobDataToFile(id);
+                }
+
                 Record record = recordSender.createRecord();
+                record.setColumnNames("filebakpath");
+                record.setColumnTypes(ColumnType.Ty_BLOB);
+                record.addColumn(new StringColumn(this.tmpFileBakPath));
                 record.setCurrentTable(col.getNamespace().getCollectionName());
                 Iterator columnItera = mongodbColumnMeta.iterator();
                 while (columnItera.hasNext()) {
@@ -204,6 +218,7 @@ public class MongoDBReader extends Reader {
             }
 
             this.collection = readerSliceConfig.getString(KeyConstant.MONGO_COLLECTION_NAME);
+            this.isGridFs = this.collection.equals("fs.files");
             this.query = readerSliceConfig.getString(KeyConstant.MONGO_QUERY);
             this.mongodbColumnMeta = JSON.parseArray(readerSliceConfig.getString(KeyConstant.MONGO_COLUMN));
             this.lowerBound = readerSliceConfig.get(KeyConstant.LOWER_BOUND);
@@ -212,9 +227,64 @@ public class MongoDBReader extends Reader {
         }
 
         @Override
+        public void prepare(){
+            String envPath = System.getProperty("datax.home");
+            this.baseDir = envPath + "\\filebak\\";
+            File dir = new File(this.baseDir);
+            try {
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
         public void destroy() {
 
         }
 
+        private void getById(ObjectId id, FileOutputStream fos){
+            try{
+                DBObject query  = new BasicDBObject("_id", id);
+                DB db = this.mongoClient.getDB(this.database);
+                GridFS gridFS = new GridFS(db);
+                GridFSDBFile gridFSDBFile = gridFS.findOne(query);
+                if(gridFSDBFile != null){
+                    gridFSDBFile.writeTo(fos);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        private String saveBlobDataToFile(ObjectId id){
+            String[] filenameList = new File(this.baseDir).list();
+            String fullFileName = "";
+            try{
+                String filename = UUID.randomUUID().toString().replace('-', '_');
+                while (isHave(filenameList, filename)) {
+                    filename = UUID.randomUUID().toString().replace('-', '_');
+                }
+                fullFileName = this.baseDir + filename;
+                this.tmpFileBakPath = fullFileName;
+                FileOutputStream fos = new FileOutputStream(fullFileName);
+                getById(id, fos);
+                fos.close();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return fullFileName;
+        }
+
+        private static boolean isHave(String[] strs,String s){
+            for(int i=0;i<strs.length;i++){
+                if(strs[i].indexOf(s) != -1){
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
