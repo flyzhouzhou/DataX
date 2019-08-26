@@ -17,6 +17,7 @@ public class RabbitmqUtils {
     private String routingKey;
 
     private Connection connection;
+    private Channel channel;
 
     public RabbitmqUtils(){
         String envPath = System.getProperty("datax.home");
@@ -40,6 +41,7 @@ public class RabbitmqUtils {
 
     public void finalize(){
         try{
+            channel.close();
             connection.close();
         }catch(Exception e){
             e.printStackTrace();
@@ -54,6 +56,10 @@ public class RabbitmqUtils {
         connectionFactory.setPassword(rabbitPassword);
         try{
             this.connection = connectionFactory.newConnection();
+            channel = connection.createChannel(1);
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
+            channel.queueBind(queueName, exchangeName, routingKey);
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -61,13 +67,13 @@ public class RabbitmqUtils {
 
     public void produceMessage(String msg){
         try{
-            Channel channel = connection.createChannel(1);
-            channel.queueDeclare(queueName, true, false, false, null);
-            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
-            channel.queueBind(queueName, exchangeName, routingKey);
+//            Channel channel = connection.createChannel(1);
+//            channel.queueDeclare(queueName, true, false, false, null);
+//            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
+//            channel.queueBind(queueName, exchangeName, routingKey);
             String message = msg;
             channel.basicPublish(exchangeName, routingKey, null, message.getBytes());
-            channel.close();
+//            channel.close();
         }catch(Exception e){
             e.printStackTrace();
         }
