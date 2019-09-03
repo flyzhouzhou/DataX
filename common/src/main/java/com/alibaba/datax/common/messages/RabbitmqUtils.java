@@ -57,8 +57,8 @@ public class RabbitmqUtils {
         try{
             this.connection = connectionFactory.newConnection();
             channel = connection.createChannel(1);
-            channel.queueDeclare(queueName, true, false, false, null);
-            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
+            channel.queueDeclare(queueName, false, false, true, null);
+            channel.exchangeDeclare(exchangeName,"direct",false,true,null);
             channel.queueBind(queueName, exchangeName, routingKey);
         }catch(Exception e){
             e.printStackTrace();
@@ -81,10 +81,10 @@ public class RabbitmqUtils {
 
     public void consumeMessage(){
         try{
-            Channel channel = connection.createChannel(1);
-            channel.queueDeclare(queueName, true, false, false, null);
-            channel.exchangeDeclare(exchangeName,"direct",true,false,null);
-            channel.queueBind(queueName, exchangeName, routingKey);
+//            Channel channel = connection.createChannel(1);
+//            channel.queueDeclare(queueName, false, false, false, null);
+//            channel.exchangeDeclare(exchangeName,"direct",false,false,null);
+//            channel.queueBind(queueName, exchangeName, routingKey);
             Consumer consumer = new DefaultConsumer(channel){
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)throws IOException{

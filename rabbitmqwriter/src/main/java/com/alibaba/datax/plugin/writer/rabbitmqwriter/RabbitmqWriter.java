@@ -6,6 +6,7 @@ import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.messages.JobStateStructure;
 import com.alibaba.datax.common.messages.RabbitmqUtils;
 import com.alibaba.datax.common.messages.RedisStorage;
+import com.alibaba.datax.common.messages.ZeromqUtils;
 import com.alibaba.datax.common.plugin.RecordReceiver;
 import com.alibaba.datax.common.spi.Writer;
 import com.alibaba.datax.common.util.Configuration;
@@ -78,6 +79,7 @@ public class RabbitmqWriter extends Writer {
         private static String binaryString = "binarystring";
         private String baseDir;
         private RabbitmqUtils rabbitmqUtils;
+        private ZeromqUtils zeromqUtils;
 
 
         @Override
@@ -107,6 +109,7 @@ public class RabbitmqWriter extends Writer {
             this.sleepTime = this.writerSliceConfig.getLong(Key.SLEEP_TIME, 0);
 
             this.rabbitmqUtils = new RabbitmqUtils();
+            this.zeromqUtils = new ZeromqUtils();
         }
 
         @Override
@@ -134,6 +137,7 @@ public class RabbitmqWriter extends Writer {
                     if (this.message) {
                         String msg = recordToString(record);
                         rabbitmqUtils.produceMessage(msg);
+                        //zeromqUtils.produceMessage(msg);
                     } else {
                         /* do nothing */
                     }
